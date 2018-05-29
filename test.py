@@ -18,8 +18,10 @@ from tqdm import tqdm
  
 from coco_loader import coco_loader
 from torchvision import models                                                                     
-from convcap import convcap
+# from convcap import convcap
 from vggfeats import Vgg16Feats
+from myconvcap import convcap
+# from resnetfeats import ResNet101Feats as Vgg16Feats
 from evaluate import language_eval
 
 

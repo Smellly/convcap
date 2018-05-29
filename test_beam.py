@@ -20,8 +20,10 @@ from tqdm import tqdm
 from beamsearch import beamsearch 
 from coco_loader import coco_loader
 from torchvision import models                                                                    
-from convcap import convcap
+# from convcap import convcap
+from myconvcap import convcap
 from vggfeats import Vgg16Feats
+# from resnetfeats import ResNet101Feats as Vgg16Feats
 from evaluate import language_eval
 
 def repeat_img(args, img_emb):

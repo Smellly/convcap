@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-import matplotlib; matplotlib.use('Agg')
+# import matplotlib; matplotlib.use('Agg')
 import os
 import os.path as osp
 import argparse
@@ -56,6 +56,9 @@ parser.add_argument('--attention', dest='attention', action='store_true', \
                     help='Use this for convcap with attention (by default set)')
 
 parser.add_argument('--no-attention', dest='attention', action='store_false', \
+                    help='Use this for convcap without attention')
+
+parser.add_argument('--load_model', type=bool, default=False, \
                     help='Use this for convcap without attention')
 
 parser.set_defaults(attention=True)

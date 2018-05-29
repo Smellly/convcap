@@ -19,8 +19,10 @@ import torchvision.transforms as transforms
 from torchvision import models                                                                     
 
 from coco_loader import coco_loader
-from convcap import convcap
-from vggfeats import Vgg16Feats
+# from convcap import convcap
+from preEmb_convcap import convcap
+# from vggfeats import Vgg16Feats
+from resnetfeats import ResNet101Feats
 from tqdm import tqdm 
 from test import test 
 
@@ -53,19 +55,30 @@ def train(args):
   train_data_loader = DataLoader(dataset=train_data, num_workers=args.nthreads,\
     batch_size=args.batchsize, shuffle=True, drop_last=True)
 
-  #Load pre-trained imgcnn
-  model_imgcnn = Vgg16Feats()  
+  # model_imgcnn = Vgg16Feats()  
+  model_imgcnn = ResNet101Feats()
   model_imgcnn.cuda() 
-  model_imgcnn.train(True) 
 
   #Convcap model
   model_convcap = convcap(train_data.numwords, args.num_layers, is_attention=args.attention)
   model_convcap.cuda()
-  model_convcap.train(True)
 
   optimizer = optim.RMSprop(model_convcap.parameters(), lr=args.learning_rate)
-  scheduler = lr_scheduler.StepLR(optimizer, step_size=args.lr_step_size, gamma=.1)
   img_optimizer = None
+
+  start_epoch = 0
+  # Load pre-trained imgcnn
+  if args.load_model:
+    modelfn = osp.join(args.model_dir, 'model.pth')
+    print('[DEBUG] Loading checkpoint %s' % modelfn)
+    model_param = torch.load(modelfn)
+    start_epoch = model_param['epoch']
+    model_imgcnn.load_state_dict(model_param['img_state_dict'])
+    model_convcap.load_state_dict(model_param['state_dict'])
+
+  model_imgcnn.train(True) 
+  model_convcap.train(True)
+  scheduler = lr_scheduler.StepLR(optimizer, step_size=args.lr_step_size, gamma=.1)
 
   batchsize = args.batchsize
   ncap_per_img = args.ncap_per_img
@@ -74,7 +87,7 @@ def train(args):
   nbatches = np.int_(np.floor((len(train_data.ids)*1.)/batchsize)) 
   bestscore = .0
 
-  for epoch in range(args.epochs):
+  for epoch in range(start_epoch, args.epochs):
     loss_train = 0.
     
     if(epoch == args.finetune_after):

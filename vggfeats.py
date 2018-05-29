@@ -17,4 +17,6 @@ class Vgg16Feats(nn.Module):
     x_pool = self.features_pool(x)
     x_feat = x_pool.view(x_pool.size(0), -1)
     y = self.classifier(x_feat)
+    # print x_pool.size() # (20L, 512L, 7L, 7L)
+    # print y.size() # (20L, 4096L)
     return x_pool, y

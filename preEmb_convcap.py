@@ -7,6 +7,9 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.autograd import Variable
 
+from tqdm import tqdm
+import pickle
+
 #Layers adapted for captioning from https://arxiv.org/abs/1705.03122
 def Conv1d(in_channels, out_channels, kernel_size, padding, dropout=0):
     m = nn.Conv1d(in_channels, out_channels, kernel_size, padding=padding)
@@ -17,7 +20,19 @@ def Conv1d(in_channels, out_channels, kernel_size, padding, dropout=0):
 
 def Embedding(num_embeddings, embedding_dim, padding_idx):
     m = nn.Embedding(num_embeddings, embedding_dim, padding_idx=padding_idx)
-    m.weight.data.normal_(0, 0.1)
+    # m.weight.data.normal_(0, 0.1)
+    worddict_tmp = pickle.load(open('./data/wordlist.p', 'rb'))
+    wordlist = [l for l in iter(worddict_tmp.keys()) if l != '</S>']
+    wordlist = ['EOS'] + sorted(wordlist)
+    assert len(wordlist) == num_embeddings
+    print '[DEBUG] Load pre-trained wordemb'
+    with open('./data/word_emb.txt', 'r') as f:
+        emb_tmp = f.read().splitlines()[2:]
+    # emb = torch.zeros([len(num_embeddings, embed_dim)])
+    for i in tqdm(emb_tmp):
+        word = i.split()[0]
+        # emb[wordlist.index(word), :] = i.split()[1:]
+        m.weight.data[wordlist.index(word), :] = i.split()[1:]
     return m
 
 def Linear(in_features, out_features, dropout=0.):
